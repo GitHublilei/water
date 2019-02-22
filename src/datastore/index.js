@@ -21,7 +21,7 @@ if (process.type !== 'renderer') {
   }
 }
 
-const adapter = new FileSync(path.join(STORE_PATH, '/data.json')) // 初始化lowdb读写的json文件名以及存储路径
+const adapter = new FileSync(path.join(STORE_PATH, '/water_data.json')) // 初始化lowdb读写的json文件名以及存储路径
 
 const db = Datastore(adapter) // lowdb接管该文件
 db._.mixin(LodashId) // 通过._mixin()引入

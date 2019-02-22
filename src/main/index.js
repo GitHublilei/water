@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import db from '../datastore'
 import pkg from '../../package.json'
 import fixPath from 'fix-path'
@@ -17,9 +17,13 @@ if (process.env.DEBUG_ENV === 'debug') {
 }
 
 let mainWindow
+let settingWindow
 const mainWinURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080/#main-page`
   : `file://${__dirname}/index.html#main-page`
+const settingWinURL = process.env.NODE_ENV === 'development'
+  ? `http://localhost:9080/#setting`
+  : `file://${__dirname}/index.html#setting`
 
 // fix the $PATH in macOS
 fixPath()
@@ -56,6 +60,42 @@ function createMainWindow () {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+    if (process.platform === 'linux') {
+      app.quit()
+    }
+  })
+}
+
+function createSettingWindow () {
+  const options = {
+    height: 450,
+    width: 800,
+    show: true, // 创建后是否显示
+    frame: true, // 是否创建frameless窗口
+    center: true,
+    fullscreenable: false, // 是否允许全屏
+    resizable: false,
+    title: 'PicGo',
+    vibrancy: 'ultra-dark', // 窗口模糊的样式（仅macOS）
+    transparent: true, // 是否是透明窗口（仅macOS）
+    titleBarStyle: 'hidden', // 标题栏的样式，有hidden、hiddenInset、customButtonsOnHover等
+    webPreferences: {
+      backgroundThrottling: false, // 当页面被置于非激活窗口的时候是否停止动画和计时器
+      webSecurity: false
+    }
+  }
+
+  settingWindow = new BrowserWindow(options)
+
+  settingWindow.loadURL(settingWinURL)
+
+  settingWindow.on('closed', () => {
+    settingWindow = null
+    if (!mainWindow) {
+      createMainWindow()
+    } else {
+      mainWindow.show()
+    }
   })
 }
 
@@ -63,7 +103,19 @@ if (process.platform === 'win32') {
   app.setAppUserModelId(pkg.build.appId)
 }
 
-app.on('ready', createMainWindow)
+ipcMain.on('openSettingWindow', (evt) => {
+  if (!settingWindow) {
+    createSettingWindow()
+  } else {
+    settingWindow.show()
+  }
+  mainWindow.hide()
+})
+
+app.on('ready', () => {
+  createMainWindow()
+  createSettingWindow()
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
