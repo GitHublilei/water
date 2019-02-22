@@ -1,5 +1,5 @@
 <template>
-  <div id="main-page" :style="{ backgroundImage: 'url(' + logo + ')' }">
+  <div id="main-page" :style="{ backgroundImage: 'url(' + log + ')' }">
 
   </div>
 </template>
@@ -69,11 +69,10 @@ export default {
 </script>
 <style lang="stylus" scoped>
   #main-page
-    background #409EFF
+    background #6060FF
     color #FFF
     height 100vh
     width 100vw
-    border-radius 50%
     text-align center
     line-height 100vh
     font-size 40px
