@@ -26,6 +26,42 @@ export default {
     window.addEventListener('mouseup', this.handleMouseUp, false)
   },
   methods: {
+    buildMenu () {
+      const _this = this
+      const template = [
+        {
+          label: '打开详细窗口',
+          click () {
+            _this.$electron.ipcRenderer.send('openSettingWindow')
+          }
+        },
+        // {
+        //   label: '选择默认图床',
+        //   type: 'submenu',
+        //   submenu
+        // },
+        {
+          label: '最小化窗口',
+          role: 'minimize'
+        },
+        {
+          label: '重启应用',
+          click () {
+            _this.$electron.remote.app.relaunch()
+            _this.$electron.remote.app.exit(0)
+          }
+        },
+        {
+          role: 'quit',
+          label: '退出'
+        }
+      ]
+
+      this.menu = this.$electron.remote.Menu.buildFromTemplate(template)
+    },
+    getMenu () {
+      this.buildMenu()
+    },
     handleMouseDown (e) {
       this.dragging = true
       this.wX = e.pageX
@@ -52,6 +88,7 @@ export default {
       if (this.screenX === e.screenX && this.screenY === e.screenY) {
         if (e.button === 0) { // left mouse
         } else {
+          this.getMenu()
           this.openContextMenu()
         }
       }
